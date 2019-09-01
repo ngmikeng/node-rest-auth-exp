@@ -3,7 +3,6 @@ import httpStatus from "http-status";
 import { default as User, IUser } from "../models/user.model.js";
 import APIError from "../helpers/errorHandlers/APIError";
 import { responseSuccess } from "../helpers/responseHandlers/index";
-import { useDb } from "../config/databases/mongodb";
 
 /**
  * Load user and append to req.

@@ -1,6 +1,5 @@
 import { Router } from "express";
-import expressJwt from "express-jwt";
-import config from "../config/config";
+import passport from "passport";
 import { login, randomNumber } from "../controllers/auth.controller";
 import authValidation from "../validation/auth.validation";
 import { createValidator } from "express-joi-validation";
@@ -61,6 +60,6 @@ router.post("/login", validator.body(authValidation.login.body), login);
  *      401:
  *        description: 'Unauthorized'
  */
-router.get("/randomNumber", expressJwt({ secret: config.jwtSecret }), randomNumber);
+router.get("/randomNumber", passport.authenticate("jwt", { session: false }), randomNumber);
 
 export default router;

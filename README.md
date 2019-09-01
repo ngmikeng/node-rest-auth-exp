@@ -1,4 +1,4 @@
-Express Typescript Rest API Starter
+Node Rest API Authentication Experimental
 ===
 - Simple project starter point for Rest API using Nodejs & Expressjs.
 - Starter point for learning and practice Rest API with Typescript, Nodejs & Expressjs.
@@ -36,12 +36,6 @@ $ npm run start
 ```shell
 $ npm run watch
 ```
-
-### TODO
-- Handle mongo validation error, index error.
-- ORM: SequelizeJS.
-- Write definitely type for some libraries which don't have.
-- Testing more.
 
 ### License
 MIT

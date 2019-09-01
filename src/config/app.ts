@@ -7,13 +7,15 @@ import methodOverride from "method-override";
 import httpStatus from "http-status";
 import cors from "cors";
 import helmet from "helmet";
-import { UnauthorizedError } from "express-jwt";
+// import { UnauthorizedError } from "express-jwt";
+import passport from "passport";
 import APIError, { IAPIError } from "../helpers/errorHandlers/APIError";
 import { responseError } from "../helpers/responseHandlers/index";
 import config from "./config";
 import winstonLogger from "./winston";
 import routers from "../routes/index.route";
 import { createConnection as createMongoConnection } from "./databases/mongodb";
+import { JwtStrategy } from "../passports/jwtStrategy";
 
 const app = express();
 
@@ -37,6 +39,17 @@ app.use(helmet());
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());
 
+// Setup passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user: any, done) => {
+  done(null, user.username);
+});
+
+// use passport jwt
+passport.use(JwtStrategy);
+
 if (config.isUseMongo) {
   createMongoConnection()
     .then(() => winstonLogger.info("Created connection to mongodb successful"))
@@ -52,10 +65,10 @@ app.use("/api/v1", routers);
 // if error is not an instanceOf APIError, convert it.
 app.use((err: IAPIError, req: Request, res: Response, next: NextFunction) => {
   // handle UnauthorizedError from express-jwt middleware
-  if (err instanceof UnauthorizedError) {
+  /*if (err instanceof UnauthorizedError) {
     const error = new APIError("Unauthorized error", err.status, err.isPublic);
     return next(error);
-  } else if (err && err.name === "ValidationError") { // handle validation error from Joi.validate
+  } else*/ if (err && err.name === "ValidationError") { // handle validation error from Joi.validate
     const validationError = new APIError("validation error", 400, err.isPublic);
     return next(validationError);
   } else if (!(err instanceof APIError)) {
