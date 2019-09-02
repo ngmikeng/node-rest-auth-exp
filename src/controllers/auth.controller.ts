@@ -4,6 +4,8 @@ import httpStatus from "http-status";
 import APIError from "../helpers/errorHandlers/APIError";
 import { responseSuccess } from "../helpers/responseHandlers/index";
 import config from "../config/config";
+import { RefreshTokenStore } from "../services/refreshTokenStore";
+const refreshTokenStore = new RefreshTokenStore();
 
 // sample user, used for authentication
 const MOCK_USER = {
@@ -22,12 +24,49 @@ export function login(req: Request, res: Response, next: NextFunction) {
   // Ideally you'll fetch this from the db
   // Idea here was to show how jwt works with simplicity
   if (req.body.username === MOCK_USER.username && req.body.password === MOCK_USER.password) {
-    const token = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "60s" });
+    const token = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "60 seconds" });
+    const refreshToken = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "5 minutes" });
+    // save refresh token in local memory
+    refreshTokenStore.setPayload(refreshToken, {username: req.body.username});
 
-    return res.json(responseSuccess({ token: token, username: MOCK_USER.username }));
+    return res.json(responseSuccess({
+      token: token,
+      refreshToken: refreshToken,
+      username: MOCK_USER.username
+    }));
   }
 
   return next(new APIError("Authentication error", httpStatus.UNAUTHORIZED, true));
+}
+
+/**
+ * Returns new auth token if refresh token is exists and valid
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}
+ */
+export function refreshToken(req: Request, res: Response, next: NextFunction) {
+  if (req.body.refreshToken) {
+    // get refresh token from local memory
+    const refreshTokenPayload = refreshTokenStore.getPayload(req.body.refreshToken);
+    if (refreshTokenPayload) {
+      // verify is refresh token valid
+      jwt.verify(req.body.refreshToken, config.jwtSecret, (err: Error, decoded: {username: string}) => {
+        if (err) {
+          return next(new APIError(`Authentication error: ${err.message}`, httpStatus.UNAUTHORIZED, true));
+        } else {
+          const token = jwt.sign({ username: decoded.username }, config.jwtSecret, { expiresIn: "60 seconds" });
+
+          return res.json(responseSuccess({ token: token }));
+        }
+      });
+    } else {
+      return next(new APIError("Authentication error", httpStatus.UNAUTHORIZED, true));
+    }
+  } else {
+    return next(new APIError("Authentication error", httpStatus.UNAUTHORIZED, true));
+  }
 }
 
 /**

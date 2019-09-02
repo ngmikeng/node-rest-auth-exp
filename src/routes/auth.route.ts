@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
-import { login, randomNumber } from "../controllers/auth.controller";
+import { login, randomNumber, refreshToken } from "../controllers/auth.controller";
 import authValidation from "../validation/auth.validation";
 import { createValidator } from "express-joi-validation";
 const validator = createValidator();
@@ -39,6 +39,37 @@ const router = Router();
  *        description: 'Unauthorized'
  */
 router.post("/login", validator.body(authValidation.login.body), login);
+
+/**
+ * POST /api/v1/auth/refreshToken
+ * - Refresh auth token
+ */
+/**
+ * @swagger
+ * /auth/refreshToken:
+ *  post:
+ *    tags: ["auth"]
+ *    summary: Refresh auth token
+ *    consumes:
+ *      - application/json
+ *    parameters:
+ *      - in: body
+ *        name: request payload
+ *        description: Refresh token payload.
+ *        schema:
+ *          type: object
+ *          properties:
+ *            refreshToken:
+ *              type: string
+ *          example:
+ *            refreshToken: "JWT_AUTH_TOKEN"
+ *    responses:
+ *      200:
+ *        description: 'OK'
+ *      401:
+ *        description: 'Unauthorized'
+ */
+router.post("/refreshToken", validator.body(authValidation.refreshToken.body), refreshToken);
 
 /**
  * GET /api/v1/auth/random-number
