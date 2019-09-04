@@ -1,6 +1,7 @@
 import Joi from "@hapi/joi";
 
 export default {
+  token: Joi.string().required(),
   login: {
     body: Joi.object({
       username: Joi.string().required(),

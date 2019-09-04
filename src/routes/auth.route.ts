@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
-import { login, randomNumber, refreshToken } from "../controllers/auth.controller";
+import { login, randomNumber, refreshToken, googleSignIn } from "../controllers/auth.controller";
 import authValidation from "../validation/auth.validation";
 import { createValidator } from "express-joi-validation";
 const validator = createValidator();
@@ -70,6 +70,37 @@ router.post("/login", validator.body(authValidation.login.body), login);
  *        description: 'Unauthorized'
  */
 router.post("/refreshToken", validator.body(authValidation.refreshToken.body), refreshToken);
+
+/**
+ * POST /api/v1/auth/google-signin
+ * - Refresh auth token
+ */
+/**
+ * @swagger
+ * /auth/google-signin:
+ *  post:
+ *    tags: ["auth"]
+ *    summary: Google signin
+ *    consumes:
+ *      - application/json
+ *    parameters:
+ *      - in: body
+ *        name: id token
+ *        description: Id token authenticated on frontend.
+ *        schema:
+ *          type: object
+ *          properties:
+ *            idToken:
+ *              type: string
+ *          example:
+ *            idToken: "GG_ID_TOKEN"
+ *    responses:
+ *      200:
+ *        description: 'OK'
+ *      401:
+ *        description: 'Unauthorized'
+ */
+router.post("/google-signin", validator.body(authValidation.token), googleSignIn);
 
 /**
  * GET /api/v1/auth/random-number
