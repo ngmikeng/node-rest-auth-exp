@@ -3,7 +3,7 @@ import passport from "passport";
 import { login, randomNumber, refreshToken, googleSignIn } from "../controllers/auth.controller";
 import authValidation from "../validation/auth.validation";
 import { createValidator } from "express-joi-validation";
-const validator = createValidator();
+const validator = createValidator({ passError: true });
 const router = Router();
 
 /**
@@ -72,12 +72,12 @@ router.post("/login", validator.body(authValidation.login.body), login);
 router.post("/refreshToken", validator.body(authValidation.refreshToken.body), refreshToken);
 
 /**
- * POST /api/v1/auth/google-signin
+ * POST /api/v1/auth/googleSignin
  * - Refresh auth token
  */
 /**
  * @swagger
- * /auth/google-signin:
+ * /auth/googleSignin:
  *  post:
  *    tags: ["auth"]
  *    summary: Google signin
@@ -100,7 +100,7 @@ router.post("/refreshToken", validator.body(authValidation.refreshToken.body), r
  *      401:
  *        description: 'Unauthorized'
  */
-router.post("/google-signin", validator.body(authValidation.token), googleSignIn);
+router.post("/googleSignin", validator.body(authValidation.googleSignin.body), googleSignIn);
 
 /**
  * GET /api/v1/auth/random-number

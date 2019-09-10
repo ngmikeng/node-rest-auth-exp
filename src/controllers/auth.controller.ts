@@ -4,8 +4,9 @@ import httpStatus from "http-status";
 import APIError from "../helpers/errorHandlers/APIError";
 import { responseSuccess } from "../helpers/responseHandlers/index";
 import config from "../config/config";
-import { RefreshTokenStore } from "../services/refreshTokenStore";
+import { RefreshTokenStore, GgAuthService } from "../services/index";
 const refreshTokenStore = new RefreshTokenStore();
+
 
 // sample user, used for authentication
 const MOCK_USER = {
@@ -79,21 +80,25 @@ export function refreshToken(req: Request, res: Response, next: NextFunction) {
 export function googleSignIn(req: Request, res: Response, next: NextFunction) {
   if (req.body.idToken) {
     // TODO verify id token to google
-
-    // genereate auth token
-    const token = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "60 seconds" });
-    const refreshToken = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "5 minutes" });
-    // save refresh token in local memory
-    refreshTokenStore.setPayload(refreshToken, {username: req.body.username});
-
-    return res.json(responseSuccess({
-      token: token,
-      refreshToken: refreshToken,
-      username: MOCK_USER.username
-    }));
+    const ggAuthService = new GgAuthService();
+    ggAuthService.verify(req.body.idToken).then(payload => {
+      // TODO check is associated to google account. If false write info of social provider and create user account if no exists yet.
+      // Generate auth token & refresh token.
+      const token = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: "60 seconds" });
+      const refreshToken = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: "5 minutes" });
+      // Save refresh token in local memory.
+      refreshTokenStore.setPayload(refreshToken, {username: payload.email});
+  
+      return res.json(responseSuccess({
+        payload: payload
+      }));
+    }).catch(err => {
+      return next(err);
+    });
+  } else {
+    return next(new APIError("Request payload invalid", httpStatus.BAD_REQUEST, true));
   }
 
-  return next(new APIError("Authentication error", httpStatus.UNAUTHORIZED, true));
 }
 
 /**

@@ -13,7 +13,9 @@ const envConfigSchema = Joi.object({
     .description("JWT Secret required to sign"),
   ROOT_URL: Joi.string().default("http://localhost:5000/"),
   IS_USE_MONGO: Joi.boolean().default(true),
-  MONGODB_URI: Joi.string().default("mongodb://localhost:27017/")
+  MONGODB_URI: Joi.string().default("mongodb://localhost:27017/"),
+  GOOGLE_OAUTH_CLIENT_ID: Joi.string(),
+  GOOGLE_WEB_CLIENT_ID: Joi.string(),
 }).unknown()
 .required();
 
@@ -28,7 +30,9 @@ const config = {
   jwtSecret: envConfig.JWT_SECRET,
   rootUrl: envConfig.ROOT_URL,
   isUseMongo: envConfig.IS_USE_MONGO,
-  mongodbUrl: envConfig.MONGODB_URI
+  mongodbUrl: envConfig.MONGODB_URI,
+  googleOAuthClientId: envConfig.GOOGLE_OAUTH_CLIENT_ID,
+  googleWebClientId: envConfig.GOOGLE_WEB_CLIENT_ID,
 };
 
 export default config;

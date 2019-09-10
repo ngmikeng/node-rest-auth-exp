@@ -63,13 +63,14 @@ require("./swagger")(app);
 app.use("/api/v1", routers);
 
 // if error is not an instanceOf APIError, convert it.
-app.use((err: IAPIError, req: Request, res: Response, next: NextFunction) => {
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   // handle UnauthorizedError from express-jwt middleware
   /*if (err instanceof UnauthorizedError) {
     const error = new APIError("Unauthorized error", err.status, err.isPublic);
     return next(error);
-  } else*/ if (err && err.name === "ValidationError") { // handle validation error from Joi.validate
-    const validationError = new APIError("validation error", 400, err.isPublic);
+  } else*/
+  if (err.error && err.error.isJoi) {
+    const validationError = new APIError(`validation error: ${err.error.toString()}`, 400, err.isPublic);
     return next(validationError);
   } else if (!(err instanceof APIError)) {
     const apiError = new APIError(err.message, err.status, err.isPublic);
