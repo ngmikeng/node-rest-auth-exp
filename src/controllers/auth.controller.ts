@@ -28,7 +28,7 @@ export function login(req: Request, res: Response, next: NextFunction) {
     const token = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "60 seconds" });
     const refreshToken = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "5 minutes" });
     // save refresh token in local memory
-    refreshTokenStore.setPayload(refreshToken, {username: req.body.username});
+    refreshTokenStore.setPayload(refreshToken, { username: req.body.username });
 
     return res.json(responseSuccess({
       token: token,
@@ -53,7 +53,7 @@ export function refreshToken(req: Request, res: Response, next: NextFunction) {
     const refreshTokenPayload = refreshTokenStore.getPayload(req.body.refreshToken);
     if (refreshTokenPayload) {
       // verify is refresh token valid
-      jwt.verify(req.body.refreshToken, config.jwtSecret, (err: Error, decoded: {username: string}) => {
+      jwt.verify(req.body.refreshToken, config.jwtSecret, (err: Error, decoded: { username: string }) => {
         if (err) {
           return next(new APIError(`Authentication error: ${err.message}`, httpStatus.UNAUTHORIZED, true));
         } else {
@@ -87,8 +87,8 @@ export function googleSignIn(req: Request, res: Response, next: NextFunction) {
       const token = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: "60 seconds" });
       const refreshToken = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: "5 minutes" });
       // Save refresh token in local memory.
-      refreshTokenStore.setPayload(refreshToken, {username: payload.email});
-  
+      refreshTokenStore.setPayload(refreshToken, { username: payload.email });
+
       return res.json(responseSuccess({
         payload: payload
       }));
