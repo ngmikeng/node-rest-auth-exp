@@ -28,8 +28,13 @@ There are many types of token, although in authentication with JWT the most typi
 
 ![refresh token flow](../img/refresh-token.png")
 
+## Google Sign In flow
+
+![gg signin flow](../img/auth-google.png")
+
 ## References
 - [Session vs Token Based Authentication](https://medium.com/@sherryhsu/session-vs-token-based-authentication-11a6c5ac45e4)
 - [Refresh token with JWT authentication in Node.js](https://solidgeargroup.com/en/refresh-token-with-jwt-authentication-node-js/)
 - [JWT token strategy](https://stackoverflow.com/questions/36751304/jwt-token-strategy-for-frontend-and-backend)
+- [Google sign in backend auth](https://developers.google.com/identity/sign-in/web/backend-auth)
 

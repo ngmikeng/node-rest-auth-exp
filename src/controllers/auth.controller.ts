@@ -4,7 +4,7 @@ import httpStatus from "http-status";
 import APIError from "../helpers/errorHandlers/APIError";
 import { responseSuccess } from "../helpers/responseHandlers/index";
 import config from "../config/config";
-import { RefreshTokenStore, GgAuthService } from "../services/index";
+import { RefreshTokenStore, GgAuthService, AUTH_TOKEN_EXPIRES_IN, REFRESH_TOKEN_EXPIRES_IN } from "../services/index";
 const refreshTokenStore = new RefreshTokenStore();
 
 
@@ -25,8 +25,8 @@ export function login(req: Request, res: Response, next: NextFunction) {
   // Ideally you'll fetch this from the db
   // Idea here was to show how jwt works with simplicity
   if (req.body.username === MOCK_USER.username && req.body.password === MOCK_USER.password) {
-    const token = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "60 seconds" });
-    const refreshToken = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: "5 minutes" });
+    const token = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: AUTH_TOKEN_EXPIRES_IN });
+    const refreshToken = jwt.sign({ username: MOCK_USER.username }, config.jwtSecret, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
     // save refresh token in local memory
     refreshTokenStore.setPayload(refreshToken, { username: req.body.username });
 
@@ -57,7 +57,7 @@ export function refreshToken(req: Request, res: Response, next: NextFunction) {
         if (err) {
           return next(new APIError(`Authentication error: ${err.message}`, httpStatus.UNAUTHORIZED, true));
         } else {
-          const token = jwt.sign({ username: decoded.username }, config.jwtSecret, { expiresIn: "60 seconds" });
+          const token = jwt.sign({ username: decoded.username }, config.jwtSecret, { expiresIn: AUTH_TOKEN_EXPIRES_IN });
 
           return res.json(responseSuccess({ token: token }));
         }
@@ -84,8 +84,8 @@ export function googleSignIn(req: Request, res: Response, next: NextFunction) {
     ggAuthService.verify(req.body.idToken).then(payload => {
       // TODO check is associated to google account. If false write info of social provider and create user account if no exists yet.
       // Generate auth token & refresh token.
-      const token = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: "60 seconds" });
-      const refreshToken = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: "5 minutes" });
+      const token = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: AUTH_TOKEN_EXPIRES_IN });
+      const refreshToken = jwt.sign({ username: payload.email }, config.jwtSecret, { expiresIn: REFRESH_TOKEN_EXPIRES_IN });
       // Save refresh token in local memory.
       refreshTokenStore.setPayload(refreshToken, { username: payload.email });
 
